@@ -210,30 +210,30 @@ public:
     //template<typename... Args>
     //debug(std::format_string<Args...> fmt) -> debug<Args...>;
 
-    template<typename... Args>
-    void debug(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::DEBUG, source, fmt, std::forward<Args>(args)...);
-    }
+    //template<typename... Args>
+    //void debug(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    //    log(LogLevel::DEBUG, source, fmt, std::forward<Args>(args)...);
+    //}
 
-    template<typename... Args>
-    void info(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::INFO, source, fmt, std::forward<Args>(args)...);
-    }
+    //template<typename... Args>
+    //void info(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    //    log(LogLevel::INFO, source, fmt, std::forward<Args>(args)...);
+    //}
 
-    template<typename... Args>
-    void warning(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::WARNING, source, fmt, std::forward<Args>(args)...);
-    }
+    //template<typename... Args>
+    //void warning(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    //    log(LogLevel::WARNING, source, fmt, std::forward<Args>(args)...);
+    //}
 
-    template<typename... Args>
-    void error(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::ERROR, source, fmt, std::forward<Args>(args)...);
-    }
+    //template<typename... Args>
+    //void error(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    //    log(LogLevel::ERROR, source, fmt, std::forward<Args>(args)...);
+    //}
 
-    template<typename... Args>
-    void critical(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::CRITICAL, source, fmt, std::forward<Args>(args)...);
-    }
+    //template<typename... Args>
+    //void critical(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    //    log(LogLevel::CRITICAL, source, fmt, std::forward<Args>(args)...);
+    //}
 
     void set_min_level(LogLevel level) {
         std::lock_guard<std::mutex> lock(write_mutex);
