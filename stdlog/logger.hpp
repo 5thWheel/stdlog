@@ -269,6 +269,12 @@ public:
 
 std::unique_ptr<stdlog::Logger> the_logger;
 
+Logger& createLogger(Logger::Config& config)
+{
+    the_logger = std::make_unique<stdlog::Logger>(config);
+    return *(the_logger.get());
+}
+
 STDLOG_END_NAMESPACE
 
 #define log_debug(fmt,...)      stdlog::the_logger->log(LogLevel::DEBUG, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)

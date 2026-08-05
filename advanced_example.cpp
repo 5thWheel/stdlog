@@ -128,8 +128,7 @@ int main() {
 
     //Logger logger(config);
 
-    stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
-    Logger& logger = *(stdlog::the_logger.get());
+    Logger& logger = stdlog::createLogger(config);
 
     std::println("╔========================================================╗");
     std::println("║     C++23 Rolling Logger - Advanced Example            ║");

@@ -14,8 +14,8 @@ int main() {
     config.min_level = LogLevel::DEBUG;
 
     //Logger logger(config);
-    stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
-    Logger& logger = *(stdlog::the_logger.get());
+
+    Logger& logger = stdlog::createLogger(config);
 
     std::println("Logger initialized. Logging to: {}\n", logger.get_current_log_file());
 
