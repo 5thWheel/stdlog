@@ -20,7 +20,7 @@ endif()
 
 # For MSVC
 if(MSVC)
-    target_compile_options(logger_example PRIVATE /std:c++latest)
+    target_compile_options(logger_example PRIVATE /std:c++latest /Zc:preprocessor)
 endif()
 
 # Optional: Add include directory

@@ -52,35 +52,43 @@ public:
     struct Config {
         std::string log_directory = "./logs";
         std::string filename_prefix = "app";
-        size_t max_file_size = 1 * 1024 * 1024; // 1 MB
+        std::string filename_extension = ".log";
+        size_t max_file_size = 10 * 1024 * 1024; // 10 MB
         std::chrono::hours roll_time_interval{ 24 }; // 24 hours
         LogLevel min_level = LogLevel::INFO;
+
+        friend class Logger;
+
+    private:
+        std::string get_filename_with_timestamp() const {
+            auto now = std::chrono::system_clock::now();
+            auto tp = std::chrono::time_point_cast<std::chrono::seconds>(now);
+            return std::format("{}/{}_{:%Y%m%d_%H%M%S}{}",
+                log_directory, filename_prefix, tp, filename_extension);
+        }
     };
 
 private:
     Config config;
-    //std::ofstream file;
     FILE* file = NULL;
     std::mutex write_mutex{};
     std::chrono::system_clock::time_point next_roll_time{};
     std::string current_filename{};
     size_t current_file_size = 0;
 
-    static constexpr std::string_view level_strings[] = {
-        "NONE", "TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "ALL"
-    };
-
-    //std::string get_timestamp() const {
-    //    auto now = std::chrono::system_clock::now();
-    //    auto time = std::chrono::system_clock::to_time_t(now);
-    //    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-    //        now.time_since_epoch()) % 1000;
-    // 
-    //    std::stringstream ss;
-    //    ss << std::put_time(std::localtime(&time), "%Y-%m-%d %H:%M:%S")
-    //        << '.' << std::setfill('0') << std::setw(3) << ms.count();
-    //    return ss.str();
-    //}
+    static constexpr std::string_view level_string(stdlog::LogLevel level) {
+        switch (level) {
+        case stdlog::LogLevel::NONE: return "NONE";
+        case stdlog::LogLevel::TRACE: return "TRACE";
+        case stdlog::LogLevel::DEBUG: return "DEBUG";
+        case stdlog::LogLevel::INFO: return "INFO";
+        case stdlog::LogLevel::WARNING: return "WARNING";
+        case stdlog::LogLevel::ERROR: return "ERROR";
+        case stdlog::LogLevel::CRITICAL: return "CRITICAL";
+        case stdlog::LogLevel::ALL: return "ALL";
+        default: return "";
+        }
+    }
 
     std::string source_to_string(const std::source_location& source) {
         return std::format("{}:{}:{}",
@@ -88,22 +96,6 @@ private:
             source.function_name(),
             source.line()
         );
-    }
-
-    std::string get_filename_with_timestamp() const {
-        auto now = std::chrono::system_clock::now();
-        auto tp = std::chrono::time_point_cast<std::chrono::seconds>(now);
-        return std::format("{}/{}_{:%Y%m%d_%H%M%S}.log",
-            config.log_directory, config.filename_prefix, tp);
-
-        //auto time = std::chrono::system_clock::to_time_t(now);
-        // 
-        //std::stringstream ss;
-        //ss << config.log_directory << '/'
-        //    << config.filename_prefix << '_'
-        //    << std::put_time(std::localtime(&time), "%Y%m%d_%H%M%S")
-        //    << ".log";
-        //return ss.str();
     }
 
     void close_file() {
@@ -121,8 +113,7 @@ private:
             fs::create_directories(config.log_directory);
         }
 
-        current_filename = get_filename_with_timestamp();
-        //file.open(current_filename, std::ios::app);
+        current_filename = config.get_filename_with_timestamp();
         file = std::fopen(current_filename.c_str(), "w");
 
         if (file == NULL) {
@@ -147,11 +138,8 @@ private:
         }
     }
 
-    void write_to_file(std::string_view message) {     
+    void write_to_file(std::string_view message) {
         check_and_roll();
-     
-        //file << message << '\n';
-        //file.flush();
 
         std::println(file, "{}", message);
 
@@ -178,7 +166,8 @@ public:
     Logger& operator=(Logger&&) noexcept = default;
 
     template<typename... Args>
-    void log(LogLevel level, const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    //void log(LogLevel level, const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+    void log(LogLevel level, const char* source_file, const char* source_function, const size_t source_line_no, std::format_string<Args...> fmt, Args&&... args) {
         if (level < config.min_level) {
             return;
         }
@@ -189,16 +178,9 @@ public:
 
         auto tp = std::chrono::time_point_cast<std::chrono::seconds>(now);
 
-        //std::string message = std::format(
-        //    "[{}] [{}] {}",
-        //    get_timestamp(),
-        //    level_strings[static_cast<int>(level)],
-        //    std::format(fmt, std::forward<Args>(args)...)
-        //);
-
-        std::string message = std::format("{:%F %T} [{}] [{}] {}", tp,
-            source_to_string(source),
-            level_strings[static_cast<int>(level)],
+        std::string message = std::format("{:%F %T} [{}:{}:{}] [{}] {}", tp,
+            /*source_to_string(source),*/ fs::path(source_file).filename().string(), source_function, source_line_no,
+            level_string(level),
             std::format(fmt, std::forward<Args>(args)...)
         );
 
@@ -211,29 +193,46 @@ public:
         write_to_file(message);
     }
 
+    //template<typename... Args>
+    //struct debug {
+    //    debug(std::format_string<Args...> fmt, Args&&... args, std::source_location source = std::source_location::current()) {
+    //        log(LogLevel::DEBUG, source, fmt, std::forward<Args>(args)...);
+    //    }
+    // 
+    //    debug(std::format_string<Args...> fmt, std::source_location source = std::source_location::current()) {
+    //        log(LogLevel::DEBUG, source, fmt);
+    //    }
+    //};
+    // 
+    //template<typename... Args>
+    //debug(std::format_string<Args...> fmt, Args&&... args) -> debug<Args...>;
+    // 
+    //template<typename... Args>
+    //debug(std::format_string<Args...> fmt) -> debug<Args...>;
+
     template<typename... Args>
-    void debug(std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::DEBUG, std::source_location::current(), fmt, std::forward<Args>(args)...);
+    void debug(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+        log(LogLevel::DEBUG, source, fmt, std::forward<Args>(args)...);
     }
 
     template<typename... Args>
-    void info(std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::INFO, std::source_location::current(), fmt, std::forward<Args>(args)...);
+    void info(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+        log(LogLevel::INFO, source, fmt, std::forward<Args>(args)...);
     }
 
     template<typename... Args>
-    void warning(std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::WARNING, std::source_location::current(), fmt, std::forward<Args>(args)...);
+    void warning(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+        log(LogLevel::WARNING, source, fmt, std::forward<Args>(args)...);
     }
 
     template<typename... Args>
-    void error(std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::ERROR, std::source_location::current(), fmt, std::forward<Args>(args)...);
+    void error(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+        log(LogLevel::ERROR, source, fmt, std::forward<Args>(args)...);
     }
 
     template<typename... Args>
-    void critical(std::format_string<Args...> fmt, Args&&... args) {
-        log(LogLevel::CRITICAL, std::source_location::current(), fmt, std::forward<Args>(args)...);
+    void critical(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
+        log(LogLevel::CRITICAL, source, fmt, std::forward<Args>(args)...);
     }
 
     void set_min_level(LogLevel level) {
