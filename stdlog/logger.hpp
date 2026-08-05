@@ -90,6 +90,16 @@ private:
         }
     }
 
+    static constexpr std::string_view level_color(stdlog::LogLevel level) {
+        switch (level) {
+        case stdlog::LogLevel::INFO: return "\033[32m";
+        case stdlog::LogLevel::WARNING: return "\033[33m";
+        case stdlog::LogLevel::ERROR: return "\033[31m";
+        case stdlog::LogLevel::CRITICAL: return "\033[91m";
+        default: return "";
+        }
+    }
+
     std::string source_to_string(const std::source_location& source) {
         return std::format("{}:{}:{}",
             fs::path(source.file_name()).filename().string(),
@@ -186,7 +196,8 @@ public:
 
 #ifdef _DEBUG
         // Print to console
-        std::println("{}", message);
+
+        std::println("{}{}\033[0m", level_color(level), message);
 #endif
 
         // Write to file
