@@ -4,34 +4,18 @@
 using stdlog::Logger;
 using stdlog::LogLevel;
 
-// Create a logger with custom configuration
-Logger::Config config{
-/*log_directory*/ "./logs",
-/*filename_prefix*/ "logger_test",
-/*filename_extension*/ ".log",
-/*max_file_size*/ 1 * 1024 * 1024,
-/*roll_time_interval*/ std::chrono::hours(1),
-/*min_level*/ LogLevel::DEBUG
-};
-
-Logger logger(config);
-
-#define log_debug(fmt,...) logger.log(LogLevel::DEBUG, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_info(fmt,...) logger.log(LogLevel::INFO, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_warning(fmt,...) logger.log(LogLevel::WARNING, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_error(fmt,...) logger.log(LogLevel::ERROR, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_critical(fmt,...) logger.log(LogLevel::CRITICAL, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-
 int main() {
-    //// Create a logger with custom configuration
-    //Logger::Config config;
-    //config.log_directory = "./logs";
-    //config.filename_prefix = "logger_test";
-    //config.max_file_size = 1 * 1024 * 1024; // 5 MB for file rolling
-    //config.roll_time_interval = std::chrono::hours(1); // Daily rotation
-    //config.min_level = LogLevel::DEBUG;
+    // Create a logger with custom configuration
+    Logger::Config config;
+    config.log_directory = "./logs";
+    config.filename_prefix = "logger_test";
+    config.max_file_size = 1024; // 1 KB for file rolling
+    config.roll_time_interval = std::chrono::hours(1); // Daily rotation
+    config.min_level = LogLevel::DEBUG;
 
     //Logger logger(config);
+    stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
+    Logger& logger = *(stdlog::the_logger.get());
 
     std::println("Logger initialized. Logging to: {}\n", logger.get_current_log_file());
 

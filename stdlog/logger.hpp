@@ -267,4 +267,13 @@ public:
     }
 };
 
+std::unique_ptr<stdlog::Logger> the_logger;
+
 STDLOG_END_NAMESPACE
+
+#define log_debug(fmt,...)      stdlog::the_logger->log(LogLevel::DEBUG, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_info(fmt,...)       stdlog::the_logger->log(LogLevel::INFO, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_warning(fmt,...)    stdlog::the_logger->log(LogLevel::WARNING, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_error(fmt,...)      stdlog::the_logger->log(LogLevel::ERROR, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_critical(fmt,...)   stdlog::the_logger->log(LogLevel::CRITICAL, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
+

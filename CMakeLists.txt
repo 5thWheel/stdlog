@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add the example executable
-add_executable(logger_example example_usage.cpp)
-#add_executable(logger_example advanced_example.cpp)
+#add_executable(logger_example example_usage.cpp)
+add_executable(logger_example advanced_example.cpp)
 
 # Link against standard library features
 target_link_libraries(logger_example PRIVATE)

@@ -5,6 +5,17 @@
 using stdlog::Logger;
 using stdlog::LogLevel;
 
+//Logger::Config config{
+///*log_directory*/ "./logs",
+///*filename_prefix*/ "advanced_demo",
+///*filename_extension*/ ".log",
+///*max_file_size*/ 1024 * 1024,
+///*roll_time_interval*/ std::chrono::hours(1),
+///*min_level*/ LogLevel::DEBUG,
+//};
+//
+//Logger logger(config);
+
 void simulate_worker(Logger& logger, int worker_id, int iterations) {
     std::random_device rd;
     std::mt19937 gen(rd() + worker_id);
@@ -16,31 +27,31 @@ void simulate_worker(Logger& logger, int worker_id, int iterations) {
 
         switch (i % 4) {
             case 0:
-                logger.debug("Worker {}: Debug message iteration {}", worker_id, i);
+                log_debug("Worker {}: Debug message iteration {}", worker_id, i);
                 break;
             case 1:
-                logger.info("Worker {}: Processing data batch {} completed", worker_id, i);
+                log_info("Worker {}: Processing data batch {} completed", worker_id, i);
                 break;
             case 2:
-                logger.warning("Worker {}: Memory usage at {}%", worker_id, 70 + (i % 20));
+                log_warning("Worker {}: Memory usage at {}%", worker_id, 70 + (i % 20));
                 break;
             case 3:
-                logger.error("Worker {}: Failed to process item {}", worker_id, i);
+                log_error("Worker {}: Failed to process item {}", worker_id, i);
                 break;
         }
     }
 
-    logger.info("Worker {} finished (processed {} items)", worker_id, iterations);
+    log_info("Worker {} finished (processed {} items)", worker_id, iterations);
 }
 
 void demonstrate_file_rolling(Logger& logger) {
-    logger.info("=== Demonstrating File Rolling ===");
+    log_info("=== Demonstrating File Rolling ===");
     
     // Log messages to trigger size-based rolling
     std::string large_message(1000, 'X'); // 1KB message
     
     for (int i = 0; i < 100; ++i) {
-        logger.info("Message {}: {}", i, large_message);
+        log_info("Message {}: {}", i, large_message);
         
         if (i % 25 == 0) {
             std::println("Current log file: {}", logger.get_current_log_file());
@@ -49,25 +60,25 @@ void demonstrate_file_rolling(Logger& logger) {
 }
 
 void demonstrate_exception_handling(Logger& logger) {
-    logger.info("=== Demonstrating Exception Handling ===");
+    log_info("=== Demonstrating Exception Handling ===");
     
     try {
         std::vector<int> data = {1, 2, 3};
-        logger.info("Accessing index 5 in vector of size 3");
+        log_info("Accessing index 5 in vector of size 3");
         int i = data.at(5); // This will throw
     } catch (const std::out_of_range& e) {
-        logger.error("Exception caught: {}", e.what());
+        log_error("Exception caught: {}", e.what());
     }
 
     try {
         throw std::runtime_error("Simulated critical error");
     } catch (const std::exception& e) {
-        logger.critical("Critical exception: {}", e.what());
+        log_critical("Critical exception: {}", e.what());
     }
 }
 
 void demonstrate_performance_logging(Logger& logger) {
-    logger.info("=== Demonstrating Performance Logging ===");
+    log_info("=== Demonstrating Performance Logging ===");
     
     // Simulate various operations and log their performance
     std::vector<std::pair<std::string, int>> operations = {
@@ -79,66 +90,69 @@ void demonstrate_performance_logging(Logger& logger) {
 
     for (const auto& [op_name, duration_ms] : operations) {
         if (duration_ms > 200) {
-            logger.warning("Slow operation '{}' took {} ms", op_name, duration_ms);
+            log_warning("Slow operation '{}' took {} ms", op_name, duration_ms);
         } else if (duration_ms > 100) {
-            logger.info("Operation '{}' took {} ms", op_name, duration_ms);
+            log_info("Operation '{}' took {} ms", op_name, duration_ms);
         } else {
-            logger.debug("Fast operation '{}' took {} ms", op_name, duration_ms);
+            log_debug("Fast operation '{}' took {} ms", op_name, duration_ms);
         }
     }
 }
 
 void demonstrate_level_filtering(Logger& logger) {
-    logger.info("=== Demonstrating Log Level Filtering ===");
+    log_info("=== Demonstrating Log Level Filtering ===");
     
     // Log at all levels
-    logger.debug("This is a debug message (visible)");
-    logger.info("This is an info message (visible)");
+    log_debug("This is a debug message (visible)");
+    log_info("This is an info message (visible)");
     
     // Change to WARNING level
     logger.set_min_level(LogLevel::WARNING);
-    logger.info("This info message will NOT be logged (level changed to WARNING)");
-    logger.warning("This warning message is visible");
-    logger.error("This error message is visible");
+    log_info("This info message will NOT be logged (level changed to WARNING)");
+    log_warning("This warning message is visible");
+    log_error("This error message is visible");
     
     // Reset to DEBUG
     logger.set_min_level(LogLevel::DEBUG);
-    logger.info("This info message is visible again (reset to DEBUG)");
+    log_info("This info message is visible again (reset to DEBUG)");
 }
 
 int main() {
     // Configure logger with smaller file size for demonstration
     Logger::Config config;
-    config.log_directory = "./logs_advanced";
+    config.log_directory = "./logs";
     config.filename_prefix = "advanced_demo";
-    config.max_file_size = 1024 * 1024; // 1 MB for easier testing
+    config.max_file_size = 1024; // 1 KB for easier testing
     config.roll_time_interval = std::chrono::hours(1);
     config.min_level = LogLevel::DEBUG;
 
-    Logger logger(config);
+    //Logger logger(config);
 
-    std::println("╔════════════════════════════════════════════════════════╗");
-    std::println("║     C++23 Rolling Logger - Advanced Example             ║");
+    stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
+    Logger& logger = *(stdlog::the_logger.get());
+
+    std::println("╔========================================================╗");
+    std::println("║     C++23 Rolling Logger - Advanced Example            ║");
     std::println("╚════════════════════════════════════════════════════════╝\n");
 
-    logger.info("Application started");
-    logger.info("Log directory: {}", config.log_directory);
-    logger.info("Current log file: {}", logger.get_current_log_file());
+    log_info("Application started");
+    log_info("Log directory: {}", config.log_directory);
+    log_info("Current log file: {}", logger.get_current_log_file());
 
     // Test 1: Basic level testing
     std::println("\n[TEST 1] Testing log levels...\n");
-    logger.debug("Debug level message");
-    logger.info("Info level message");
-    logger.warning("Warning level message");
-    logger.error("Error level message");
-    logger.critical("Critical level message");
+    log_debug("Debug level message");
+    log_info("Info level message");
+    log_warning("Warning level message");
+    log_error("Error level message");
+    log_critical("Critical level message");
 
     // Test 2: Formatted output
     std::println("\n[TEST 2] Testing formatted output...\n");
     int count = 42;
     double pi = 3.14159265;
     std::string app_name = "MyApp";
-    logger.info("Application: {}, Version: {}, Pi: {:.4f}", app_name, count, pi);
+    log_info("Application: {}, Version: {}, Pi: {:.4f}", app_name, count, pi);
 
     // Test 3: Level filtering
     std::println("\n[TEST 3] Testing level filtering...\n");
@@ -158,7 +172,7 @@ int main() {
 
     // Test 7: Multi-threaded logging
     std::println("\n[TEST 7] Testing multi-threaded logging...\n");
-    logger.info("Starting multi-threaded test with 4 workers");
+    log_info("Starting multi-threaded test with 4 workers");
     
     std::vector<std::thread> threads;
     const int num_workers = 4;
@@ -173,13 +187,13 @@ int main() {
         thread.join();
     }
 
-    logger.info("All worker threads completed");
+    log_info("All worker threads completed");
 
     // Final summary
     std::println("\n[SUMMARY]\n");
-    logger.info("Advanced example completed successfully");
-    logger.info("Check log files in: {}", config.log_directory);
-    logger.info("Application shutting down");
+    log_info("Advanced example completed successfully");
+    log_info("Check log files in: {}", config.log_directory);
+    log_info("Application shutting down");
 
     std::println("\n╔════════════════════════════════════════════════════════╗");
     std::println("║                Example completed!                       ║");
