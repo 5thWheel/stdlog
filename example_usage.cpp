@@ -1,17 +1,19 @@
-#include "rolling_logger.hpp"
+#include "stdlog/logger.hpp"
 #include <thread>
-#include <chrono>
+
+using stdlog::Logger;
+using stdlog::LogLevel;
 
 int main() {
     // Create a logger with custom configuration
-    RollingLogger::Config config;
+    Logger::Config config;
     config.log_directory = "./logs";
     config.filename_prefix = "application";
     config.max_file_size = 5 * 1024 * 1024; // 5 MB for file rolling
     config.roll_time_interval = std::chrono::hours(24); // Daily rotation
     config.min_level = LogLevel::DEBUG;
 
-    RollingLogger logger(config);
+    Logger logger(config);
 
     std::println("Logger initialized. Logging to: {}\n", logger.get_current_log_file());
 

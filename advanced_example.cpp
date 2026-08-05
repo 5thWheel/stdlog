@@ -1,10 +1,11 @@
-#include "rolling_logger.hpp"
+#include "stdlog/logger.hpp"
 #include <thread>
-#include <vector>
-#include <chrono>
 #include <random>
 
-void simulate_worker(RollingLogger& logger, int worker_id, int iterations) {
+using stdlog::Logger;
+using stdlog::LogLevel;
+
+void simulate_worker(Logger& logger, int worker_id, int iterations) {
     std::random_device rd;
     std::mt19937 gen(rd() + worker_id);
     std::uniform_int_distribution<> dis(100, 500);
@@ -32,7 +33,7 @@ void simulate_worker(RollingLogger& logger, int worker_id, int iterations) {
     logger.info("Worker {} finished (processed {} items)", worker_id, iterations);
 }
 
-void demonstrate_file_rolling(RollingLogger& logger) {
+void demonstrate_file_rolling(Logger& logger) {
     logger.info("=== Demonstrating File Rolling ===");
     
     // Log messages to trigger size-based rolling
@@ -47,13 +48,13 @@ void demonstrate_file_rolling(RollingLogger& logger) {
     }
 }
 
-void demonstrate_exception_handling(RollingLogger& logger) {
+void demonstrate_exception_handling(Logger& logger) {
     logger.info("=== Demonstrating Exception Handling ===");
     
     try {
         std::vector<int> data = {1, 2, 3};
         logger.info("Accessing index 5 in vector of size 3");
-        data.at(5); // This will throw
+        int i = data.at(5); // This will throw
     } catch (const std::out_of_range& e) {
         logger.error("Exception caught: {}", e.what());
     }
@@ -65,7 +66,7 @@ void demonstrate_exception_handling(RollingLogger& logger) {
     }
 }
 
-void demonstrate_performance_logging(RollingLogger& logger) {
+void demonstrate_performance_logging(Logger& logger) {
     logger.info("=== Demonstrating Performance Logging ===");
     
     // Simulate various operations and log their performance
@@ -87,7 +88,7 @@ void demonstrate_performance_logging(RollingLogger& logger) {
     }
 }
 
-void demonstrate_level_filtering(RollingLogger& logger) {
+void demonstrate_level_filtering(Logger& logger) {
     logger.info("=== Demonstrating Log Level Filtering ===");
     
     // Log at all levels
@@ -107,14 +108,14 @@ void demonstrate_level_filtering(RollingLogger& logger) {
 
 int main() {
     // Configure logger with smaller file size for demonstration
-    RollingLogger::Config config;
+    Logger::Config config;
     config.log_directory = "./logs_advanced";
     config.filename_prefix = "advanced_demo";
     config.max_file_size = 1024 * 1024; // 1 MB for easier testing
     config.roll_time_interval = std::chrono::hours(1);
     config.min_level = LogLevel::DEBUG;
 
-    RollingLogger logger(config);
+    Logger logger(config);
 
     std::println("╔════════════════════════════════════════════════════════╗");
     std::println("║     C++23 Rolling Logger - Advanced Example             ║");
