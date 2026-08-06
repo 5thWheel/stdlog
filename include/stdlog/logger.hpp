@@ -267,18 +267,7 @@ public:
     }
 };
 
-std::unique_ptr<stdlog::Logger> the_logger;
-
-/// @brief Faux Singleton behaviour
-/// @param config 
-/// @return a Logger instance
-Logger& createLogger(Logger::Config& config)
-{
-    if (!the_logger) {
-        the_logger = std::make_unique<stdlog::Logger>(config);
-    }
-    return *(the_logger.get());
-}
+extern std::unique_ptr<stdlog::Logger> the_logger;
 
 STDLOG_END_NAMESPACE
 

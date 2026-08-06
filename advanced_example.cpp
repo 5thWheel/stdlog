@@ -128,7 +128,7 @@ int main() {
 
     //Logger logger(config);
 
-    Logger& logger = stdlog::createLogger(config);
+    stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
 
     std::println("╔========================================================╗");
     std::println("║     C++23 Rolling Logger - Advanced Example            ║");
@@ -136,7 +136,7 @@ int main() {
 
     log_info("Application started");
     log_info("Log directory: {}", config.log_directory);
-    log_info("Current log file: {}", logger.get_current_log_file());
+    log_info("Current log file: {}", stdlog::the_logger->get_current_log_file());
 
     // Test 1: Basic level testing
     std::println("\n[TEST 1] Testing log levels...\n");

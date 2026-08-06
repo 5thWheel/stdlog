@@ -13,11 +13,9 @@ int main() {
     config.roll_time_interval = std::chrono::hours(1); // Daily rotation
     config.min_level = LogLevel::DEBUG;
 
-    //Logger logger(config);
+    stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
 
-    Logger& logger = stdlog::createLogger(config);
-
-    std::println("Logger initialized. Logging to: {}\n", logger.get_current_log_file());
+    std::println("Logger initialized. Logging to: {}\n", stdlog::the_logger->get_current_log_file());
 
     // Log messages at different levels
     log_debug("This is a debug message");
