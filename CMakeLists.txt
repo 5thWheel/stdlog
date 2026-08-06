@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project("stdlog" 
-    VERSION "0.10.0" 
+    VERSION "0.11.0" 
     DESCRIPTION "Header-only C++23 logger class with zero external dependencies" 
     LANGUAGES CXX
 )
