@@ -282,9 +282,12 @@ Logger& createLogger(Logger::Config& config)
 
 STDLOG_END_NAMESPACE
 
-#define log_debug(fmt,...)      stdlog::the_logger->log(LogLevel::DEBUG, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_info(fmt,...)       stdlog::the_logger->log(LogLevel::INFO, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_warning(fmt,...)    stdlog::the_logger->log(LogLevel::WARNING, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_error(fmt,...)      stdlog::the_logger->log(LogLevel::ERROR, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
-#define log_critical(fmt,...)   stdlog::the_logger->log(LogLevel::CRITICAL, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
+#define STDLOG_RECORD(LEVEL, fmt, ...)	stdlog::the_logger->log(LEVEL, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
 
+#define log_debug(fmt,...)      STDLOG_RECORD(stdlog::LogLevel::DEBUG, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_info(fmt,...)       STDLOG_RECORD(stdlog::LogLevel::INFO, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_warn(fmt,...)       STDLOG_RECORD(stdlog::LogLevel::WARNING, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_warning(fmt,...)    STDLOG_RECORD(stdlog::LogLevel::WARNING, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_error(fmt,...)      STDLOG_RECORD(stdlog::LogLevel::ERROR, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_fatal(fmt,...)      STDLOG_RECORD(stdlog::LogLevel::CRITICAL, fmt __VA_OPT__(,) __VA_ARGS__)
+#define log_critical(fmt,...)   STDLOG_RECORD(stdlog::LogLevel::CRITICAL, fmt __VA_OPT__(,) __VA_ARGS__)
