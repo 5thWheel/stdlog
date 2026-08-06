@@ -29,18 +29,18 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
-install(
-    TARGETS ${PROJECT_NAME} 
-    EXPORT "${PROJECT_NAME}Targets"
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+#install(
+#    TARGETS ${PROJECT_NAME} 
+#    EXPORT "${PROJECT_NAME}Targets"
+#    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+#)
 
-install(
-    EXPORT "${PROJECT_NAME}Targets"
-    FILE "${PROJECT_NAME}Targets.cmake"
-    NAMESPACE stdlog::
-    DESTINATION lib/cmake/stdlog
-)
+#install(
+#    EXPORT "${PROJECT_NAME}Targets"
+#    FILE "${PROJECT_NAME}Targets.cmake"
+#    NAMESPACE stdlog::
+#    DESTINATION lib/cmake/stdlog
+#)
 
 # Add the example executable
 option(BUILD_TESTING "Build sample executables" OFF)
