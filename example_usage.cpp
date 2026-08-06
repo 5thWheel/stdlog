@@ -4,6 +4,9 @@
 using stdlog::Logger;
 using stdlog::LogLevel;
 
+// Declare extern logger variable
+std::unique_ptr<stdlog::Logger> stdlog::the_logger = nullptr;
+
 int main() {
     // Create a logger with custom configuration
     Logger::Config config;
@@ -14,8 +17,9 @@ int main() {
     config.min_level = LogLevel::DEBUG;
 
     stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
+    Logger& logger = *(stdlog::the_logger.get());
 
-    std::println("Logger initialized. Logging to: {}\n", stdlog::the_logger->get_current_log_file());
+    PRINT_LINE("Logger initialized. Logging to: {}\n", logger.get_current_log_file());
 
     // Log messages at different levels
     log_debug("This is a debug message");

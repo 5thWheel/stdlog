@@ -5,6 +5,9 @@
 using stdlog::Logger;
 using stdlog::LogLevel;
 
+// Declare extern logger variable
+std::unique_ptr<stdlog::Logger> stdlog::the_logger = nullptr;
+
 //Logger::Config config{
 ///*log_directory*/ "./logs",
 ///*filename_prefix*/ "advanced_demo",
@@ -54,7 +57,7 @@ void demonstrate_file_rolling(Logger& logger) {
         log_info("Message {}: {}", i, large_message);
         
         if (i % 25 == 0) {
-            std::println("Current log file: {}", logger.get_current_log_file());
+            PRINT_LINE("Current log file: {}", logger.get_current_log_file());
         }
     }
 }
@@ -126,20 +129,19 @@ int main() {
     config.roll_time_interval = std::chrono::hours(1);
     config.min_level = LogLevel::DEBUG;
 
-    //Logger logger(config);
-
     stdlog::the_logger = std::make_unique<stdlog::Logger>(config);
+    Logger& logger = *(stdlog::the_logger.get());
 
-    std::println("╔========================================================╗");
-    std::println("║     C++23 Rolling Logger - Advanced Example            ║");
-    std::println("╚════════════════════════════════════════════════════════╝\n");
+    PRINT_LINE("╔════════════════════════════════════════════════════════╗");
+    PRINT_LINE("║     C++23 Rolling Logger - Advanced Example            ║");
+    PRINT_LINE("╚════════════════════════════════════════════════════════╝\n");
 
     log_info("Application started");
     log_info("Log directory: {}", config.log_directory);
-    log_info("Current log file: {}", stdlog::the_logger->get_current_log_file());
+    log_info("Current log file: {}", logger.get_current_log_file());
 
     // Test 1: Basic level testing
-    std::println("\n[TEST 1] Testing log levels...\n");
+    PRINT_LINE("\n[TEST 1] Testing log levels...\n");
     log_debug("Debug level message");
     log_info("Info level message");
     log_warning("Warning level message");
@@ -147,30 +149,30 @@ int main() {
     log_critical("Critical level message");
 
     // Test 2: Formatted output
-    std::println("\n[TEST 2] Testing formatted output...\n");
+    PRINT_LINE("\n[TEST 2] Testing formatted output...\n");
     int count = 42;
     double pi = 3.14159265;
     std::string app_name = "MyApp";
     log_info("Application: {}, Version: {}, Pi: {:.4f}", app_name, count, pi);
 
     // Test 3: Level filtering
-    std::println("\n[TEST 3] Testing level filtering...\n");
+    PRINT_LINE("\n[TEST 3] Testing level filtering...\n");
     demonstrate_level_filtering(logger);
 
     // Test 4: Exception handling
-    std::println("\n[TEST 4] Testing exception handling...\n");
+    PRINT_LINE("\n[TEST 4] Testing exception handling...\n");
     demonstrate_exception_handling(logger);
 
     // Test 5: Performance logging
-    std::println("\n[TEST 5] Testing performance logging...\n");
+    PRINT_LINE("\n[TEST 5] Testing performance logging...\n");
     demonstrate_performance_logging(logger);
 
     // Test 6: File rolling
-    std::println("\n[TEST 6] Testing file rolling (may take a moment)...\n");
+    PRINT_LINE("\n[TEST 6] Testing file rolling (may take a moment)...\n");
     demonstrate_file_rolling(logger);
 
     // Test 7: Multi-threaded logging
-    std::println("\n[TEST 7] Testing multi-threaded logging...\n");
+    PRINT_LINE("\n[TEST 7] Testing multi-threaded logging...\n");
     log_info("Starting multi-threaded test with 4 workers");
     
     std::vector<std::thread> threads;
@@ -189,15 +191,15 @@ int main() {
     log_info("All worker threads completed");
 
     // Final summary
-    std::println("\n[SUMMARY]\n");
+    PRINT_LINE("\n[SUMMARY]\n");
     log_info("Advanced example completed successfully");
     log_info("Check log files in: {}", config.log_directory);
     log_info("Application shutting down");
 
-    std::println("\n╔════════════════════════════════════════════════════════╗");
-    std::println("║                Example completed!                       ║");
-    std::println("║         Check {} for all log files          ║", config.log_directory);
-    std::println("╚════════════════════════════════════════════════════════╝\n");
+    PRINT_LINE("\n╔════════════════════════════════════════════════════════╗");
+    PRINT_LINE("║                Example completed!                      ║");
+    PRINT_LINE("║         Check {} for all log files                 ║", config.log_directory);
+    PRINT_LINE("╚════════════════════════════════════════════════════════╝\n");
 
     return 0;
 }

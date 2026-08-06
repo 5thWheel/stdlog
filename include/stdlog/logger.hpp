@@ -1,23 +1,33 @@
 #pragma once
 
-//#include <iostream>
-//#include <fstream>
 #include <cstdio>
-#include <sstream>
+//#include <sstream>
 #include <string>
-#include <vector>
+//#include <vector>
 #include <chrono>
 #include <mutex>
 #include <memory>
 #include <filesystem>
+
+#if defined (__cpp_lib_print)
 #include <print>
 #include <format>
-#include <source_location>
+#define PRINT_LINE      std::println
+#define MAKE_STRING     std::format
+#define FORMAT_STRING   std::format_string
+#else
+#define FMT_HEADER_ONLY
+#include <fmt/format.h>
+#include <fmt/chrono.h>
+#define PRINT_LINE      fmt::println
+#define MAKE_STRING     fmt::format
+#define FORMAT_STRING   fmt::format_string
+#endif
 
 namespace fs = std::filesystem;
 
 #define STDLOG_VERSION_MAJOR 0
-#define STDLOG_VERSION_MINOR 10
+#define STDLOG_VERSION_MINOR 13
 #define STDLOG_VERSION_PATCH 0
 
 #ifndef STDLOG_BEGIN_NAMESPACE
@@ -50,12 +60,14 @@ enum class LogLevel : uint16_t {
 class Logger final {
 public:
     struct Config {
-        std::string log_directory = "./logs";
-        std::string filename_prefix = "app";
-        std::string filename_extension = ".log";
-        size_t max_file_size = 10 * 1024 * 1024; // 10 MB
+        Config() {}
+
+        std::string log_directory{ "./logs" };
+        std::string filename_prefix{ "app"};
+        std::string filename_extension{ ".log" };
+        size_t max_file_size{ 5 * 1024 * 1024 }; // 10 MB
         std::chrono::hours roll_time_interval{ 24 }; // 24 hours
-        LogLevel min_level = LogLevel::INFO;
+        LogLevel min_level{ LogLevel::INFO };
 
         friend class Logger;
 
@@ -63,7 +75,7 @@ public:
         std::string get_filename_with_timestamp() const {
             auto now = std::chrono::system_clock::now();
             auto tp = std::chrono::time_point_cast<std::chrono::seconds>(now);
-            return std::format("{}/{}_{:%Y%m%d_%H%M%S}{}",
+            return MAKE_STRING("{}/{}_{:%Y%m%d_%H%M%S}{}",
                 log_directory, filename_prefix, tp, filename_extension);
         }
     };
@@ -100,14 +112,6 @@ private:
         }
     }
 
-    std::string source_to_string(const std::source_location& source) {
-        return std::format("{}:{}:{}",
-            fs::path(source.file_name()).filename().string(),
-            source.function_name(),
-            source.line()
-        );
-    }
-
     void close_file() {
         if (file) {
             fclose(file);
@@ -127,7 +131,7 @@ private:
         file = std::fopen(current_filename.c_str(), "w");
 
         if (file == NULL) {
-            std::println(stderr, "Failed to open log file: {}", current_filename);
+            PRINT_LINE(stderr, "Failed to open log file: {}", current_filename);
         }
 
         current_file_size = 0;
@@ -151,7 +155,7 @@ private:
     void write_to_file(std::string_view message) {
         check_and_roll();
 
-        std::println(file, "{}", message);
+        PRINT_LINE(file, "{}", message);
 
         current_file_size += message.length() + 1; // +1 for newline
     }
@@ -176,8 +180,8 @@ public:
     Logger& operator=(Logger&&) noexcept = default;
 
     template<typename... Args>
-    //void log(LogLevel level, const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-    void log(LogLevel level, const char* source_file, const char* source_function, const size_t source_line_no, std::format_string<Args...> fmt, Args&&... args) {
+    void log(LogLevel level, const char* source_file, const char* source_function, const size_t source_line_no, 
+        FORMAT_STRING<Args...> fmt, Args&&... args) {
         if (level < config.min_level) {
             return;
         }
@@ -188,63 +192,21 @@ public:
 
         auto tp = std::chrono::time_point_cast<std::chrono::seconds>(now);
 
-        std::string message = std::format("{:%F %T} [{}:{}:{}] [{}] {}", tp,
-            /*source_to_string(source),*/ fs::path(source_file).filename().string(), source_function, source_line_no,
+        std::string message = MAKE_STRING("{:%F %T} [{}:{}:{}] [{}] {}", tp,
+            fs::path(source_file).filename().string(), source_function, source_line_no,
             level_string(level),
-            std::format(fmt, std::forward<Args>(args)...)
+            MAKE_STRING(fmt, std::forward<Args>(args)...)
         );
 
 #ifdef _DEBUG
         // Print to console
 
-        std::println("{}{}\033[0m", level_color(level), message);
+        PRINT_LINE("{}{}\033[0m", level_color(level), message);
 #endif
 
         // Write to file
         write_to_file(message);
     }
-
-    //template<typename... Args>
-    //struct debug {
-    //    debug(std::format_string<Args...> fmt, Args&&... args, std::source_location source = std::source_location::current()) {
-    //        log(LogLevel::DEBUG, source, fmt, std::forward<Args>(args)...);
-    //    }
-    // 
-    //    debug(std::format_string<Args...> fmt, std::source_location source = std::source_location::current()) {
-    //        log(LogLevel::DEBUG, source, fmt);
-    //    }
-    //};
-    // 
-    //template<typename... Args>
-    //debug(std::format_string<Args...> fmt, Args&&... args) -> debug<Args...>;
-    // 
-    //template<typename... Args>
-    //debug(std::format_string<Args...> fmt) -> debug<Args...>;
-
-    //template<typename... Args>
-    //void debug(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-    //    log(LogLevel::DEBUG, source, fmt, std::forward<Args>(args)...);
-    //}
-
-    //template<typename... Args>
-    //void info(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-    //    log(LogLevel::INFO, source, fmt, std::forward<Args>(args)...);
-    //}
-
-    //template<typename... Args>
-    //void warning(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-    //    log(LogLevel::WARNING, source, fmt, std::forward<Args>(args)...);
-    //}
-
-    //template<typename... Args>
-    //void error(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-    //    log(LogLevel::ERROR, source, fmt, std::forward<Args>(args)...);
-    //}
-
-    //template<typename... Args>
-    //void critical(const std::source_location& source, std::format_string<Args...> fmt, Args&&... args) {
-    //    log(LogLevel::CRITICAL, source, fmt, std::forward<Args>(args)...);
-    //}
 
     void set_min_level(LogLevel level) {
         std::lock_guard<std::mutex> lock(write_mutex);

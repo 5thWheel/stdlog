@@ -1,15 +1,26 @@
 cmake_minimum_required(VERSION 3.23)
 
 project("stdlog" 
-    VERSION "0.12.0"
-    DESCRIPTION "Header-only C++23 logger class with zero external dependencies" 
-    LANGUAGES CXX
+	VERSION "0.13.0"
+	DESCRIPTION "Header-only C++20 logger class based on fmtlib" 
+	LANGUAGES CXX
 )
 
-# Set C++ standard to C++23
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(FetchContent)
+
+FetchContent_Declare(
+	fmt
+	GIT_REPOSITORY 	https://github.com/fmtlib/fmt.git
+	GIT_TAG			12.2.0
+	GIT_SHALLOW		TRUE
+	SOURCE_DIR 		"${CMAKE_SOURCE_DIR}/ext/fmt"
+)
+
+FetchContent_MakeAvailable(fmt)
 
 include(GNUInstallDirs)
 
@@ -17,16 +28,16 @@ include(GNUInstallDirs)
 add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME} INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Optional
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_23)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
 install(
-    DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 #install(
@@ -43,25 +54,20 @@ install(
 #)
 
 # Add the example executable
-option(BUILD_TESTING "Build sample executables" OFF)
+option(BUILD_TESTING "Build sample executables" ON)
 
 if (BUILD_TESTING)
-    #add_executable(logger_example example_usage.cpp)
-    add_executable(logger_example advanced_example.cpp)
+	#add_executable(logger_example example_usage.cpp)
+	add_executable(logger_example advanced_example.cpp)
 
-    # Link against standard library features
-    target_link_libraries(logger_example PRIVATE)
+	# Link against standard library features
+	target_link_libraries(logger_example PRIVATE stdlog fmt::fmt)
 
-    # For GCC/Clang, ensure we have the right flags
-    if(UNIX AND NOT APPLE)
-        target_compile_options(logger_example PRIVATE -std=c++23)
-    endif()
+	# For MSVC
+	if(MSVC)
+		target_compile_options(logger_example PRIVATE /std:c++20 /Zc:preprocessor)
+	endif()
 
-    # For MSVC
-    if(MSVC)
-        target_compile_options(logger_example PRIVATE /std:c++latest /Zc:preprocessor)
-    endif()
-
-    # Optional: Add include directory
-    target_include_directories(logger_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+	# Optional: Add include directory
+	target_include_directories(logger_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
