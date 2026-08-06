@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.23)
 
 project("stdlog" 
-	VERSION "0.13.0"
-	DESCRIPTION "Header-only C++20 logger class based on fmtlib" 
+	VERSION "0.14.0"
+	DESCRIPTION "Header-only C++20 Rolling File logger class based on fmtlib" 
 	LANGUAGES CXX
+)
+
+set(CMAKE_CONFIGURATION_TYPES
+	"Debug"
+	"Release"
+	CACHE STRING "" FORCE
 )
 
 set(CMAKE_CXX_STANDARD 20)
@@ -60,13 +66,24 @@ if (BUILD_TESTING)
 	#add_executable(logger_example example_usage.cpp)
 	add_executable(logger_example advanced_example.cpp)
 
-	# Link against standard library features
-	target_link_libraries(logger_example PRIVATE stdlog fmt::fmt)
+	target_compile_definitions(logger_example PRIVATE 
+		"$<$<CONFIG:Debug>:"
+			"_CRT_SECURE_NO_WARNINGS"
+			"_DEBUG"
+		">"
+		"$<$<CONFIG:Release>:NDEBUG>"
+		"_CONSOLE"
+		"UNICODE"
+		"_UNICODE"
+	)
 
 	# For MSVC
 	if(MSVC)
 		target_compile_options(logger_example PRIVATE /std:c++20 /Zc:preprocessor)
 	endif()
+
+	# Link against standard library features
+	target_link_libraries(logger_example PRIVATE stdlog fmt::fmt)
 
 	# Optional: Add include directory
 	target_include_directories(logger_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

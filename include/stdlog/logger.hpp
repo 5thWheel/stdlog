@@ -46,7 +46,7 @@ inline namespace v0 { \
 
 STDLOG_BEGIN_NAMESPACE
 
-enum class LogLevel : uint16_t {
+enum class LogLevel {
     NONE,
     TRACE,
     DEBUG,
@@ -198,11 +198,15 @@ public:
             MAKE_STRING(fmt, std::forward<Args>(args)...)
         );
 
-#ifdef _DEBUG
         // Print to console
-
-        PRINT_LINE("{}{}\033[0m", level_color(level), message);
+#ifdef _DEBUG
+        bool print_to_console = true;
+#else
+        bool print_to_console = level < stdlog::LogLevel::INFO;
 #endif
+        if (print_to_console) {
+            PRINT_LINE("{}{}\033[0m", level_color(level), message);
+        }
 
         // Write to file
         write_to_file(message);

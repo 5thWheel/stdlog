@@ -19,7 +19,12 @@ std::unique_ptr<stdlog::Logger> stdlog::the_logger = nullptr;
 //
 //Logger logger(config);
 
-void simulate_worker(Logger& logger, int worker_id, int iterations) {
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#endif
+
+void simulate_worker([[maybe_unused]]Logger& logger, int worker_id, int iterations) {
     std::random_device rd;
     std::mt19937 gen(rd() + worker_id);
     std::uniform_int_distribution<> dis(100, 500);
@@ -62,13 +67,13 @@ void demonstrate_file_rolling(Logger& logger) {
     }
 }
 
-void demonstrate_exception_handling(Logger& logger) {
+void demonstrate_exception_handling([[maybe_unused]] Logger& logger) {
     log_info("=== Demonstrating Exception Handling ===");
     
     try {
         std::vector<int> data = {1, 2, 3};
         log_info("Accessing index 5 in vector of size 3");
-        int i = data.at(5); // This will throw
+        [[maybe_unused]]int i = data.at(5); // This will throw
     } catch (const std::out_of_range& e) {
         log_error("Exception caught: {}", e.what());
     }
@@ -80,7 +85,7 @@ void demonstrate_exception_handling(Logger& logger) {
     }
 }
 
-void demonstrate_performance_logging(Logger& logger) {
+void demonstrate_performance_logging([[maybe_unused]] Logger& logger) {
     log_info("=== Demonstrating Performance Logging ===");
     
     // Simulate various operations and log their performance
@@ -203,3 +208,7 @@ int main() {
 
     return 0;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
