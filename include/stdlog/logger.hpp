@@ -5,9 +5,7 @@
 #include <cstdio>
 #include <memory>
 #include <string>
-#include <exception>
 #include <filesystem>
-#include <type_traits>
 
 #if defined (__cpp_lib_print)
 #include <print>
@@ -30,7 +28,7 @@ namespace fs = std::filesystem;
 
 #define STDLOG_VERSION_MAJOR 0
 #define STDLOG_VERSION_MINOR 15
-#define STDLOG_VERSION_PATCH 0
+#define STDLOG_VERSION_PATCH 1
 
 #ifndef STDLOG_BEGIN_NAMESPACE
 #define STDLOG_BEGIN_NAMESPACE \
@@ -238,12 +236,6 @@ public:
         config.roll_time_interval = interval;
     }
 };
-
-
-template <std::derived_from<std::exception> E, typename... Args>
-E except(FORMAT_STRING<Args...> fmt, Args&&... args) {
-    return E(MAKE_STRING(fmt, std::forward<Args>(args)...));
-}
 
 extern std::unique_ptr<stdlog::Logger> the_logger;
 
