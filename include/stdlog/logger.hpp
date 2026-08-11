@@ -1,19 +1,20 @@
 #pragma once
 
-#include <cstdio>
-//#include <sstream>
-#include <string>
-//#include <vector>
-#include <chrono>
 #include <mutex>
+#include <chrono>
+#include <cstdio>
 #include <memory>
+#include <string>
+#include <exception>
 #include <filesystem>
+#include <type_traits>
 
 #if defined (__cpp_lib_print)
 #include <print>
 #include <format>
 #define PRINT_LINE      std::println
 #define MAKE_STRING     std::format
+#define APPEND_STRING   std::format_to
 #define FORMAT_STRING   std::format_string
 #else
 #define FMT_HEADER_ONLY
@@ -21,13 +22,14 @@
 #include <fmt/chrono.h>
 #define PRINT_LINE      fmt::println
 #define MAKE_STRING     fmt::format
+#define APPEND_STRING   fmt::format_to
 #define FORMAT_STRING   fmt::format_string
 #endif
 
 namespace fs = std::filesystem;
 
 #define STDLOG_VERSION_MAJOR 0
-#define STDLOG_VERSION_MINOR 13
+#define STDLOG_VERSION_MINOR 15
 #define STDLOG_VERSION_PATCH 0
 
 #ifndef STDLOG_BEGIN_NAMESPACE
@@ -182,7 +184,7 @@ public:
     template<typename... Args>
     void log(LogLevel level, const char* source_file, const char* source_function, const size_t source_line_no, 
         FORMAT_STRING<Args...> fmt, Args&&... args) {
-        if (level < config.min_level) {
+        if (!is_logged(level)) {
             return;
         }
 
@@ -212,7 +214,11 @@ public:
         write_to_file(message);
     }
 
-    void set_min_level(LogLevel level) {
+	bool is_logged(LogLevel level) const {
+		return !(level < config.min_level);
+	}
+
+	void set_min_level(LogLevel level) {
         std::lock_guard<std::mutex> lock(write_mutex);
         config.min_level = level;
     }
@@ -233,7 +239,17 @@ public:
     }
 };
 
+
+template <std::derived_from<std::exception> E, typename... Args>
+E except(FORMAT_STRING<Args...> fmt, Args&&... args) {
+    return E(MAKE_STRING(fmt, std::forward<Args>(args)...));
+}
+
 extern std::unique_ptr<stdlog::Logger> the_logger;
+
+bool is_logged(stdlog::LogLevel level) {
+    return (stdlog::the_logger) && (stdlog::the_logger->is_logged(level));
+}
 
 STDLOG_END_NAMESPACE
 
