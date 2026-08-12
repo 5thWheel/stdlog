@@ -12,6 +12,7 @@
 #if defined (__cpp_lib_print)
 #include <print>
 #include <format>
+#define PRINT			std::print
 #define PRINT_LINE      std::println
 #define MAKE_STRING     std::format
 #define APPEND_STRING   std::format_to
@@ -20,6 +21,7 @@
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <fmt/chrono.h>
+#define PRINT			fmt::print
 #define PRINT_LINE      fmt::println
 #define MAKE_STRING     fmt::format
 #define APPEND_STRING   fmt::format_to
@@ -29,8 +31,8 @@
 namespace fs = std::filesystem;
 
 #define STDLOG_VERSION_MAJOR 0
-#define STDLOG_VERSION_MINOR 15
-#define STDLOG_VERSION_PATCH 2
+#define STDLOG_VERSION_MINOR 16
+#define STDLOG_VERSION_PATCH 0
 
 #ifndef STDLOG_BEGIN_NAMESPACE
 #define STDLOG_BEGIN_NAMESPACE \
@@ -67,7 +69,7 @@ public:
 		std::string log_directory{ "./logs" };
 		std::string filename_prefix{ "app"};
 		std::string filename_extension{ ".log" };
-		size_t max_file_size{ 5 * 1024 * 1024 }; // 10 MB
+		size_t max_file_size{ 5 * 1024 * 1024 }; // 5 MB
 		std::chrono::hours roll_time_interval{ 24 }; // 24 hours
 		LogLevel min_level{ LogLevel::INFO };
 
