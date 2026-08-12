@@ -79,7 +79,7 @@ void demonstrate_exception_handling([[maybe_unused]] Logger& logger) {
     }
 
     try {
-        throw std::runtime_error("Simulated critical error");
+        throw stdlog::except<std::runtime_error>("Simulated critical error");
     } catch (const std::exception& e) {
         log_critical("Critical exception: {}", e.what());
     }
