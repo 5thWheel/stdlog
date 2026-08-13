@@ -9,6 +9,10 @@
 #include <filesystem>
 #include <type_traits>
 
+#define STDLOG_VERSION_MAJOR 0
+#define STDLOG_VERSION_MINOR 16
+#define STDLOG_VERSION_PATCH 1
+
 #if defined (__cpp_lib_print)
 #include <print>
 #include <format>
@@ -29,10 +33,6 @@
 #endif
 
 namespace fs = std::filesystem;
-
-#define STDLOG_VERSION_MAJOR 0
-#define STDLOG_VERSION_MINOR 16
-#define STDLOG_VERSION_PATCH 0
 
 #ifndef STDLOG_BEGIN_NAMESPACE
 #define STDLOG_BEGIN_NAMESPACE \
@@ -256,6 +256,7 @@ STDLOG_END_NAMESPACE
 
 #define STDLOG_RECORD(LEVEL, fmt, ...)	stdlog::the_logger->log(LEVEL, __FILE__, __func__, __LINE__, fmt __VA_OPT__(,) __VA_ARGS__)
 
+#define log_trace(fmt,...)      STDLOG_RECORD(stdlog::LogLevel::TRACE, fmt __VA_OPT__(,) __VA_ARGS__)
 #define log_debug(fmt,...)      STDLOG_RECORD(stdlog::LogLevel::DEBUG, fmt __VA_OPT__(,) __VA_ARGS__)
 #define log_info(fmt,...)       STDLOG_RECORD(stdlog::LogLevel::INFO, fmt __VA_OPT__(,) __VA_ARGS__)
 #define log_warn(fmt,...)       STDLOG_RECORD(stdlog::LogLevel::WARNING, fmt __VA_OPT__(,) __VA_ARGS__)
