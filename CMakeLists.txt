@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project("stdlog" 
-	VERSION "0.16.1"
+	VERSION "0.18.0"
 	DESCRIPTION "Header-only C++20 Rolling File logger class based on fmtlib" 
 	LANGUAGES CXX
 )

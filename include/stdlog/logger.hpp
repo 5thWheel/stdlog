@@ -10,8 +10,8 @@
 #include <type_traits>
 
 #define STDLOG_VERSION_MAJOR 0
-#define STDLOG_VERSION_MINOR 16
-#define STDLOG_VERSION_PATCH 1
+#define STDLOG_VERSION_MINOR 18
+#define STDLOG_VERSION_PATCH 0
 
 #if defined (__cpp_lib_print)
 #include <print>
@@ -33,6 +33,8 @@
 #endif
 
 namespace fs = std::filesystem;
+
+//#define STDLOG_USE_SHORT_DATETIME
 
 #ifndef STDLOG_BEGIN_NAMESPACE
 #define STDLOG_BEGIN_NAMESPACE \
@@ -79,7 +81,13 @@ public:
 		std::string get_filename_with_timestamp() const {
 			auto now = std::chrono::system_clock::now();
 			auto tp = std::chrono::time_point_cast<std::chrono::seconds>(now);
-			return MAKE_STRING("{}/{}_{:%Y%m%d_%H%M%S}{}",
+
+			return MAKE_STRING(
+#ifdef STDLOG_USE_SHORT_DATETIME
+				"{}/{}_{:%y%m%d_%H%M}{}",
+#else
+				"{}/{}_{:%Y%m%d_%H%M%S}{}",
+#endif
 				log_directory, filename_prefix, tp, filename_extension);
 		}
 	};
