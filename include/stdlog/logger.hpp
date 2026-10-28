@@ -9,8 +9,8 @@
 #include <filesystem>
 #include <type_traits>
 
-#define STDLOG_VERSION_MAJOR 0
-#define STDLOG_VERSION_MINOR 18
+#define STDLOG_VERSION_MAJOR 1
+#define STDLOG_VERSION_MINOR 0
 #define STDLOG_VERSION_PATCH 0
 
 #if defined (__cpp_lib_print)
@@ -39,7 +39,7 @@ namespace fs = std::filesystem;
 #ifndef STDLOG_BEGIN_NAMESPACE
 #define STDLOG_BEGIN_NAMESPACE \
 namespace stdlog {  \
-inline namespace v0 { \
+inline namespace v1 { \
 
 #endif
 
@@ -214,7 +214,7 @@ public:
 #ifdef _DEBUG
 		bool print_to_console = true;
 #else
-		bool print_to_console = level < stdlog::LogLevel::INFO;
+		bool print_to_console = config.min_level < stdlog::LogLevel::INFO;
 #endif
 		if (print_to_console) {
 			PRINT_LINE("{}{}\033[0m", level_color(level), message);
